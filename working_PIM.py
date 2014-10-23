@@ -6,29 +6,29 @@ from turtle import *
 import numpy as np
 import math
 
+### Get the cursor position to the correct position###
+def setPos(turt,back,up):
+	turt.up()
+	turt.back(back)
+	turt.left(90)
+	turt.forward(up)
+	turt.down()
+	
 def drawcicle(noOfInterface,val):
 	tlist = list()
 	screen = turtle.getscreen()
 	screen.tracer(0)
 	for i in range(noOfInterface):
 	    	tlist.append(turtle.Turtle())
-		tlist[i].up()
-		tlist[i].back(val)
-		tlist[i].left(90)
-		tlist[i].forward(200-(10+90*i))
+		setPos(tlist[i],val,200-(10+90*i))
 		tlist[i].begin_fill()
-		tlist[i].down()
 		tlist[i].circle(15)
 		tlist[i].end_fill()
 		tlist[i].hideturtle() 
 	for i in range(noOfInterface):
 	    	turt = turtle.Turtle()
-		turt.up()
-		turt.back(val-300)
-		turt.left(90)
-		turt.forward(200-(10+90*i))
+		setPos(turt,val-300,200-(10+90*i))
 		turt.begin_fill()
-		turt.down()
 		turt.circle(15)
 		turt.end_fill() 
 		turt.hideturtle()
@@ -53,11 +53,7 @@ def drawText(text,back,up):
 	screen = turtle.getscreen()
 	screen.tracer(0)
 	turt = turtle.Turtle()
-	turt.up()
-        turt.back(back)
-        turt.left(90)
-        turt.forward(up)
-	turt.down()
+	setPos(turt,back,up)
 	turt.write(text,font=("Arial", 20, "normal"))
 	turt.hideturtle()
 	screen.update()
@@ -75,13 +71,10 @@ def draw(x,y,count,isGrant,val):
 	    tlist[i].width(4)
 	    angle = math.atan((y[i]-x[i])/300.0)
 	    p.append(math.sqrt(90000+(x[i]-y[i])*(x[i]-y[i])))
-	    tlist[i].up()
 	    if val == 200:
-	    	tlist[i].back(val-275)
+		setPos(tlist[i],val-275,200-x[i])
 	    else:
-	    	tlist[i].back(val)
-	    tlist[i].left(90)
-	    tlist[i].forward(200-x[i])
+		setPos(tlist[i],val,200-x[i])
 	    if isGrant == 1:
 		    tlist[i].right(180-math.degrees(angle)+90)
 	    else:
@@ -137,7 +130,6 @@ def callAcceptance(grant,noOfInterface):
 				if grant[i][rand] in inputport[j]:
 					inputport[j].remove(grant[i][rand])
 	drawText("ACCEPT",-350,225)
-	#drawcicle(noOfInterface,-200)
 	drawcicle(noOfInterface,-300)
 	draw(x,y,count,0,-300)
 	return inputport			
@@ -148,13 +140,11 @@ while flag == 1:
 	grant = [[] for i in range(noOfInterface)]
 	request = [[] for i in range(noOfInterface)]
 	drawText("REQUEST",550,225)
-	#drawcicle(noOfInterface,600)
 	drawcicle(noOfInterface,550)
 	request = callRequest(inputport,noOfInterface)
 	initialiseDraw(inputport,noOfInterface,0,550)	
 	grant = callGrant(request,noOfInterface)
 	drawText("GRANT",100,225)
-	#drawcicle(noOfInterface,200)
 	drawcicle(noOfInterface,125)
 	initialiseDraw(grant,noOfInterface,1,-150)
 	inputport = callAcceptance(grant,noOfInterface)
