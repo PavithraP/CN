@@ -69,14 +69,21 @@ def initialiseDraw(array,noOfInterface,isGrant,val):
 			y.append(10+j*90)
 			count+=1
 	if isGrant == 0:
+		suf = 0
 		acceptCount = count+1
 		for i in range(noOfInterface):
-			for j in acceptance[i]:
-				x.append(10+i*90)
-				y.append(10+j*90)
-				count += 1
-				acceptance[i].remove(j)
+			for j in range(noOfInterface):
+				if j in acceptance[i]:
+					acceptance[i].remove(j)
+				if(sending[i][j] == 1 and suf < speedup_factor):	#acceptance = [[0 for j in range(n)] for i in range(n)]
+					x.append(10+i*90)
+					y.append(10+j*90)
+					count += 1
+					sending[i][j]=0
+					suf += 1
+					voqList[i].remove(j)
 
+		drawVOQ(noOfInterface,600)
 	if isGrant == 1:
 		draw(y,x,count,1,val,acceptCount)
 	else:
@@ -128,9 +135,12 @@ def draw(x,y,count,isGrant,val,acceptCount):
 		screen.update()
 
 noOfInterface = int(raw_input("Enter the number of port "))
+speedup_factor = int(raw_input("Enter the speed up factor "))
 inputport = [[] for i in range(noOfInterface)]
 voqList = [[] for i in range(noOfInterface)]
+sending = [[0 for j in range(noOfInterface)] for i in range(noOfInterface)]
 acceptance = [[] for i in range(noOfInterface)]
+send_count = 0
 flag = 1
 grantPtr = [0 for i in range(noOfInterface)]
 acceptPtr = [0 for i in range(noOfInterface)]
@@ -159,7 +169,7 @@ def callGrant(request,noOfInterface):
 			#print "grant ",i,grantPtr[i]
 	return grant
 
-def callAcceptance(grant,noOfInterface):
+def callAcceptance(grant,noOfInterface, send_count):
 	count = 0
 	x = list()
 	y = list()
@@ -172,13 +182,14 @@ def callAcceptance(grant,noOfInterface):
 				acceptPtr[i] = acceptPtr[i] + 1
 			print "Input port ",i+1,"accepted grant from ",acceptPtr[i]+1
 			acceptance[i].append(acceptPtr[i])
-			voqList[i].remove(acceptPtr[i])
+			sending[i][acceptPtr[i]] = 1
+			send_count += 1
 			del inputport[i][:]
 			for k in range(noOfInterface):
 				if acceptPtr[i] in inputport[k]:
 					inputport[k].remove(acceptPtr[i])
 	initialiseDraw(acceptance,noOfInterface,2,-300)	
-	return inputport			
+	return inputport,send_count			
 itr = 1
 while flag == 1:
 	txt = "ITERATION "+str(itr)
@@ -189,9 +200,9 @@ while flag == 1:
 		drawText("REQUEST",550,225)
 	else:
 		drawText("REQUEST AND SENDING",550,225)
+		send_count -= speedup_factor
 	
 	drawcicle(noOfInterface,550)
-	drawVOQ(noOfInterface,600)
 	request = callRequest(inputport,noOfInterface)
 	initialiseDraw(inputport,noOfInterface,0,550)	
 	grant = callGrant(request,noOfInterface)
@@ -199,15 +210,16 @@ while flag == 1:
 	drawcicle(noOfInterface,125)
 	drawVOQ(noOfInterface,175)
 	initialiseDraw(grant,noOfInterface,1,-150)
-	inputport = callAcceptance(grant,noOfInterface)
+	inputport,send_count = callAcceptance(grant,noOfInterface, send_count)
 	flag = 0 
 	for i in range(noOfInterface):
 		if (len(inputport[i]) != 0):
 			flag = 1
 	itr+=1
 	turtle.exitonclick()
-drawText("SENDING",550,225)
-drawcicle(noOfInterface,550)
-drawVOQ(noOfInterface,600)
-initialiseDraw(inputport,noOfInterface,0,550)	
-turtle.exitonclick()
+while(send_count > 0):
+	drawText("SENDING",550,225)
+	drawcicle(noOfInterface,550)
+	send_count -= speedup_factor
+	initialiseDraw(inputport,noOfInterface,0,550)	
+	turtle.exitonclick()
